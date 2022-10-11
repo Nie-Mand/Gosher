@@ -2,7 +2,7 @@ compile:
     @printf "\033[0;33mCompiling proto files [Language: Golang] \033[0m \n"
     @protoc --go_out=./server --go-grpc_out=./server proto/*.proto
     @printf "\033[0;33mCompiling proto files [Language: Rust] \033[0m \n"
-    @protoc --rust_out ./client/src-tauri/src/schemas proto/*.proto
+    @protoc --rust_out ./client/src-tauri/src proto/*.proto
 
 setup:
     @printf "\033[0;33mInstalling NPM Dependencies: Started\033[0m \n"

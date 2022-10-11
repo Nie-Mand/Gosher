@@ -18,222 +18,88 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
-// HelloWorldClient is the client API for HelloWorld service.
+// GosherClient is the client API for Gosher service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type HelloWorldClient interface {
-	SayHi(ctx context.Context, in *Custom, opts ...grpc.CallOption) (*CustomResponse, error)
-	Upload(ctx context.Context, opts ...grpc.CallOption) (HelloWorld_UploadClient, error)
-	Download(ctx context.Context, in *Custom, opts ...grpc.CallOption) (HelloWorld_DownloadClient, error)
+type GosherClient interface {
+	SayHi(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error)
 }
 
-type helloWorldClient struct {
+type gosherClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewHelloWorldClient(cc grpc.ClientConnInterface) HelloWorldClient {
-	return &helloWorldClient{cc}
+func NewGosherClient(cc grpc.ClientConnInterface) GosherClient {
+	return &gosherClient{cc}
 }
 
-func (c *helloWorldClient) SayHi(ctx context.Context, in *Custom, opts ...grpc.CallOption) (*CustomResponse, error) {
-	out := new(CustomResponse)
-	err := c.cc.Invoke(ctx, "/schemas.HelloWorld/SayHi", in, out, opts...)
+func (c *gosherClient) SayHi(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error) {
+	out := new(Response)
+	err := c.cc.Invoke(ctx, "/schemas.Gosher/SayHi", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *helloWorldClient) Upload(ctx context.Context, opts ...grpc.CallOption) (HelloWorld_UploadClient, error) {
-	stream, err := c.cc.NewStream(ctx, &HelloWorld_ServiceDesc.Streams[0], "/schemas.HelloWorld/Upload", opts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &helloWorldUploadClient{stream}
-	return x, nil
-}
-
-type HelloWorld_UploadClient interface {
-	Send(*UploadRequest) error
-	CloseAndRecv() (*CustomResponse, error)
-	grpc.ClientStream
-}
-
-type helloWorldUploadClient struct {
-	grpc.ClientStream
-}
-
-func (x *helloWorldUploadClient) Send(m *UploadRequest) error {
-	return x.ClientStream.SendMsg(m)
-}
-
-func (x *helloWorldUploadClient) CloseAndRecv() (*CustomResponse, error) {
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	m := new(CustomResponse)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
-func (c *helloWorldClient) Download(ctx context.Context, in *Custom, opts ...grpc.CallOption) (HelloWorld_DownloadClient, error) {
-	stream, err := c.cc.NewStream(ctx, &HelloWorld_ServiceDesc.Streams[1], "/schemas.HelloWorld/Download", opts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &helloWorldDownloadClient{stream}
-	if err := x.ClientStream.SendMsg(in); err != nil {
-		return nil, err
-	}
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	return x, nil
-}
-
-type HelloWorld_DownloadClient interface {
-	Recv() (*FileTransfer, error)
-	grpc.ClientStream
-}
-
-type helloWorldDownloadClient struct {
-	grpc.ClientStream
-}
-
-func (x *helloWorldDownloadClient) Recv() (*FileTransfer, error) {
-	m := new(FileTransfer)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
-// HelloWorldServer is the server API for HelloWorld service.
-// All implementations must embed UnimplementedHelloWorldServer
+// GosherServer is the server API for Gosher service.
+// All implementations must embed UnimplementedGosherServer
 // for forward compatibility
-type HelloWorldServer interface {
-	SayHi(context.Context, *Custom) (*CustomResponse, error)
-	Upload(HelloWorld_UploadServer) error
-	Download(*Custom, HelloWorld_DownloadServer) error
-	mustEmbedUnimplementedHelloWorldServer()
+type GosherServer interface {
+	SayHi(context.Context, *Request) (*Response, error)
+	mustEmbedUnimplementedGosherServer()
 }
 
-// UnimplementedHelloWorldServer must be embedded to have forward compatible implementations.
-type UnimplementedHelloWorldServer struct {
+// UnimplementedGosherServer must be embedded to have forward compatible implementations.
+type UnimplementedGosherServer struct {
 }
 
-func (UnimplementedHelloWorldServer) SayHi(context.Context, *Custom) (*CustomResponse, error) {
+func (UnimplementedGosherServer) SayHi(context.Context, *Request) (*Response, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SayHi not implemented")
 }
-func (UnimplementedHelloWorldServer) Upload(HelloWorld_UploadServer) error {
-	return status.Errorf(codes.Unimplemented, "method Upload not implemented")
-}
-func (UnimplementedHelloWorldServer) Download(*Custom, HelloWorld_DownloadServer) error {
-	return status.Errorf(codes.Unimplemented, "method Download not implemented")
-}
-func (UnimplementedHelloWorldServer) mustEmbedUnimplementedHelloWorldServer() {}
+func (UnimplementedGosherServer) mustEmbedUnimplementedGosherServer() {}
 
-// UnsafeHelloWorldServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to HelloWorldServer will
+// UnsafeGosherServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to GosherServer will
 // result in compilation errors.
-type UnsafeHelloWorldServer interface {
-	mustEmbedUnimplementedHelloWorldServer()
+type UnsafeGosherServer interface {
+	mustEmbedUnimplementedGosherServer()
 }
 
-func RegisterHelloWorldServer(s grpc.ServiceRegistrar, srv HelloWorldServer) {
-	s.RegisterService(&HelloWorld_ServiceDesc, srv)
+func RegisterGosherServer(s grpc.ServiceRegistrar, srv GosherServer) {
+	s.RegisterService(&Gosher_ServiceDesc, srv)
 }
 
-func _HelloWorld_SayHi_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Custom)
+func _Gosher_SayHi_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Request)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(HelloWorldServer).SayHi(ctx, in)
+		return srv.(GosherServer).SayHi(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/schemas.HelloWorld/SayHi",
+		FullMethod: "/schemas.Gosher/SayHi",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(HelloWorldServer).SayHi(ctx, req.(*Custom))
+		return srv.(GosherServer).SayHi(ctx, req.(*Request))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _HelloWorld_Upload_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(HelloWorldServer).Upload(&helloWorldUploadServer{stream})
-}
-
-type HelloWorld_UploadServer interface {
-	SendAndClose(*CustomResponse) error
-	Recv() (*UploadRequest, error)
-	grpc.ServerStream
-}
-
-type helloWorldUploadServer struct {
-	grpc.ServerStream
-}
-
-func (x *helloWorldUploadServer) SendAndClose(m *CustomResponse) error {
-	return x.ServerStream.SendMsg(m)
-}
-
-func (x *helloWorldUploadServer) Recv() (*UploadRequest, error) {
-	m := new(UploadRequest)
-	if err := x.ServerStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
-func _HelloWorld_Download_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(Custom)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
-	}
-	return srv.(HelloWorldServer).Download(m, &helloWorldDownloadServer{stream})
-}
-
-type HelloWorld_DownloadServer interface {
-	Send(*FileTransfer) error
-	grpc.ServerStream
-}
-
-type helloWorldDownloadServer struct {
-	grpc.ServerStream
-}
-
-func (x *helloWorldDownloadServer) Send(m *FileTransfer) error {
-	return x.ServerStream.SendMsg(m)
-}
-
-// HelloWorld_ServiceDesc is the grpc.ServiceDesc for HelloWorld service.
+// Gosher_ServiceDesc is the grpc.ServiceDesc for Gosher service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var HelloWorld_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "schemas.HelloWorld",
-	HandlerType: (*HelloWorldServer)(nil),
+var Gosher_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "schemas.Gosher",
+	HandlerType: (*GosherServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "SayHi",
-			Handler:    _HelloWorld_SayHi_Handler,
+			Handler:    _Gosher_SayHi_Handler,
 		},
 	},
-	Streams: []grpc.StreamDesc{
-		{
-			StreamName:    "Upload",
-			Handler:       _HelloWorld_Upload_Handler,
-			ClientStreams: true,
-		},
-		{
-			StreamName:    "Download",
-			Handler:       _HelloWorld_Download_Handler,
-			ServerStreams: true,
-		},
-	},
+	Streams:  []grpc.StreamDesc{},
 	Metadata: "proto/gosher.proto",
 }

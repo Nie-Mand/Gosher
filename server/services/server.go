@@ -2,16 +2,16 @@ package services
 
 import (
 	"Nie-Mand/Gosher/server/core"
-	out "Nie-Mand/Gosher/server/schemas"
+	"Nie-Mand/Gosher/server/schemas"
 	"context"
 )
 
 type ServerStruct struct {
-	out.UnimplementedHelloWorldServer
+	schemas.UnimplementedGosherServer
 }
 
-func (s *ServerStruct) SayHi(ctx context.Context, custom *services.Custom) (*services.CustomResponse, error) {
-	resp := out.CustomResponse{
+func (s *ServerStruct) SayHi(ctx context.Context, custom *schemas.Request) (*schemas.Response, error) {
+	resp := schemas.Response{
 		Msg: custom.Msg + ", but from server",
 	}
 	return &resp, nil
@@ -22,7 +22,7 @@ func StartServer() {
 
 	server, listen := core.CreateServer(port)
 
-	out.RegisterHelloWorldServer(server, &ServerStruct{})
+	schemas.RegisterGosherServer(server, &ServerStruct{})
 
 	listen()
 }

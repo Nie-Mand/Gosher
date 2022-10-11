@@ -1,28 +1,17 @@
 syntax = "proto3";
 
-option go_package = "./schemas";
+// option go_package = "./schemas";
 
 package schemas;
 
-message Custom {
+message Request {
     string msg = 1;
 }
 
-message CustomResponse {
+message Response {
     string msg = 1;
 }
 
-message UploadRequest {
-    string mime = 1;
-    bytes chunk = 2;
-}
-
-message FileTransfer {
-    string msg = 1;
-}
-
-service HelloWorld {
-    rpc SayHi (Custom) returns (CustomResponse);
-    rpc Upload (stream UploadRequest) returns (CustomResponse);
-    rpc Download (Custom) returns (stream FileTransfer);
+service Gosher {
+    rpc SayHi (Request) returns (Response);
 }
