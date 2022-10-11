@@ -1,7 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"Nie-Mand/Gosher/server/services"
+)
 
 func main() {
-	fmt.Println("Hello World")
+	services.StartServer()
 }
