@@ -8,8 +8,7 @@ function App() {
   const [name, setName] = useState("");
 
   async function greet() {
-    // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-    setGreetMsg(await invoke("greet", { name }));
+    setGreetMsg(await invoke("say_hi", { name }));
   }
 
   return (
@@ -24,7 +23,7 @@ function App() {
           <img src="/tauri.svg" className="logo tauri" alt="Tauri logo" />
         </a>
         <a href="https://reactjs.org" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
+          <img src="/react.svg" className="logo react" alt="React logo" />
         </a>
       </div>
 

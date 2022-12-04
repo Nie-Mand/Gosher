@@ -6,6 +6,11 @@ package schemas;
 
 message Request {
     string msg = 1;
+    string destination = 2;
+}
+
+message Identity {
+    string id = 1;
 }
 
 message Response {
@@ -14,4 +19,6 @@ message Response {
 
 service Gosher {
     rpc SayHi (Request) returns (Response);
+
+    rpc ReceiveHi (Identity) returns (stream Response) {}
 }

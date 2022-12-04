@@ -23,6 +23,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type GosherClient interface {
 	SayHi(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error)
+	ReceiveHi(ctx context.Context, in *Identity, opts ...grpc.CallOption) (Gosher_ReceiveHiClient, error)
 }
 
 type gosherClient struct {
@@ -42,11 +43,44 @@ func (c *gosherClient) SayHi(ctx context.Context, in *Request, opts ...grpc.Call
 	return out, nil
 }
 
+func (c *gosherClient) ReceiveHi(ctx context.Context, in *Identity, opts ...grpc.CallOption) (Gosher_ReceiveHiClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Gosher_ServiceDesc.Streams[0], "/schemas.Gosher/ReceiveHi", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &gosherReceiveHiClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Gosher_ReceiveHiClient interface {
+	Recv() (*Response, error)
+	grpc.ClientStream
+}
+
+type gosherReceiveHiClient struct {
+	grpc.ClientStream
+}
+
+func (x *gosherReceiveHiClient) Recv() (*Response, error) {
+	m := new(Response)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // GosherServer is the server API for Gosher service.
 // All implementations must embed UnimplementedGosherServer
 // for forward compatibility
 type GosherServer interface {
 	SayHi(context.Context, *Request) (*Response, error)
+	ReceiveHi(*Identity, Gosher_ReceiveHiServer) error
 	mustEmbedUnimplementedGosherServer()
 }
 
@@ -56,6 +90,9 @@ type UnimplementedGosherServer struct {
 
 func (UnimplementedGosherServer) SayHi(context.Context, *Request) (*Response, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SayHi not implemented")
+}
+func (UnimplementedGosherServer) ReceiveHi(*Identity, Gosher_ReceiveHiServer) error {
+	return status.Errorf(codes.Unimplemented, "method ReceiveHi not implemented")
 }
 func (UnimplementedGosherServer) mustEmbedUnimplementedGosherServer() {}
 
@@ -88,6 +125,27 @@ func _Gosher_SayHi_Handler(srv interface{}, ctx context.Context, dec func(interf
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Gosher_ReceiveHi_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(Identity)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(GosherServer).ReceiveHi(m, &gosherReceiveHiServer{stream})
+}
+
+type Gosher_ReceiveHiServer interface {
+	Send(*Response) error
+	grpc.ServerStream
+}
+
+type gosherReceiveHiServer struct {
+	grpc.ServerStream
+}
+
+func (x *gosherReceiveHiServer) Send(m *Response) error {
+	return x.ServerStream.SendMsg(m)
+}
+
 // Gosher_ServiceDesc is the grpc.ServiceDesc for Gosher service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -100,6 +158,12 @@ var Gosher_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Gosher_SayHi_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "ReceiveHi",
+			Handler:       _Gosher_ReceiveHi_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "proto/gosher.proto",
 }
