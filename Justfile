@@ -3,8 +3,8 @@ compile:
     @protoc --go_out=./server --go-grpc_out=./server proto/*.proto
     @printf "\033[0;33mCompiling proto files for cli[Language: Golang] \033[0m \n"
     @protoc --go_out=./cli --go-grpc_out=./cli proto/*.proto
-    # @printf "\033[0;33mCompiling proto files [Language: Rust] \033[0m \n"
-    # @protoc --prost_out=client/src-tauri/src --tonic_out=client/src-tauri/src proto/*.proto
+    @# printf "\033[0;33mCompiling proto files [Language: Rust] \033[0m \n"
+    @# protoc --prost_out=client/src-tauri/src --tonic_out=client/src-tauri/src proto/*.proto
 
 setup:
     @printf "\033[0;33mInstalling Golang Dependencies: Started \033[0m \n"

@@ -24,6 +24,27 @@ func HandleCLI(client *grpc.ClientConn, args []string) {
 	case "sayHi":
 		SayHi(&api)
 
+	case "ping":
+		PingForFile(&api, args[1])
+
+	case "listen":
+		if len(args) > 1 {
+			if args[1] == "pings" {
+				ListenForFilePings(&api)
+			} else if args[1] == "files" {
+				SeedFile(&api)
+			}
+		} else {
+			fmt.Println("No event provided")
+		}
+
+	case "request":
+		if len(args) > 2 {
+			RequestFile(&api, args[1], args[2])
+		} else {
+			fmt.Println("No file name or user provided")
+		}
+
 	case "receiveHi":
 		ReceiveHi(&api)
 	default:

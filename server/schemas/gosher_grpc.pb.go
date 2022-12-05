@@ -26,6 +26,8 @@ type GosherClient interface {
 	ReceiveHi(ctx context.Context, in *Identity, opts ...grpc.CallOption) (Gosher_ReceiveHiClient, error)
 	PingForFile(ctx context.Context, in *PingForFileRequest, opts ...grpc.CallOption) (Gosher_PingForFileClient, error)
 	ListenForFilePings(ctx context.Context, opts ...grpc.CallOption) (Gosher_ListenForFilePingsClient, error)
+	RequestFile(ctx context.Context, in *RequestFileRequest, opts ...grpc.CallOption) (Gosher_RequestFileClient, error)
+	SeedFile(ctx context.Context, opts ...grpc.CallOption) (Gosher_SeedFileClient, error)
 }
 
 type gosherClient struct {
@@ -140,6 +142,69 @@ func (x *gosherListenForFilePingsClient) Recv() (*ListenForFilePingsResponse, er
 	return m, nil
 }
 
+func (c *gosherClient) RequestFile(ctx context.Context, in *RequestFileRequest, opts ...grpc.CallOption) (Gosher_RequestFileClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Gosher_ServiceDesc.Streams[3], "/schemas.Gosher/RequestFile", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &gosherRequestFileClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Gosher_RequestFileClient interface {
+	Recv() (*RequestFileResponse, error)
+	grpc.ClientStream
+}
+
+type gosherRequestFileClient struct {
+	grpc.ClientStream
+}
+
+func (x *gosherRequestFileClient) Recv() (*RequestFileResponse, error) {
+	m := new(RequestFileResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *gosherClient) SeedFile(ctx context.Context, opts ...grpc.CallOption) (Gosher_SeedFileClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Gosher_ServiceDesc.Streams[4], "/schemas.Gosher/SeedFile", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &gosherSeedFileClient{stream}
+	return x, nil
+}
+
+type Gosher_SeedFileClient interface {
+	Send(*SeedFileRequest) error
+	Recv() (*SeedFileResponse, error)
+	grpc.ClientStream
+}
+
+type gosherSeedFileClient struct {
+	grpc.ClientStream
+}
+
+func (x *gosherSeedFileClient) Send(m *SeedFileRequest) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *gosherSeedFileClient) Recv() (*SeedFileResponse, error) {
+	m := new(SeedFileResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // GosherServer is the server API for Gosher service.
 // All implementations must embed UnimplementedGosherServer
 // for forward compatibility
@@ -148,6 +213,8 @@ type GosherServer interface {
 	ReceiveHi(*Identity, Gosher_ReceiveHiServer) error
 	PingForFile(*PingForFileRequest, Gosher_PingForFileServer) error
 	ListenForFilePings(Gosher_ListenForFilePingsServer) error
+	RequestFile(*RequestFileRequest, Gosher_RequestFileServer) error
+	SeedFile(Gosher_SeedFileServer) error
 	mustEmbedUnimplementedGosherServer()
 }
 
@@ -166,6 +233,12 @@ func (UnimplementedGosherServer) PingForFile(*PingForFileRequest, Gosher_PingFor
 }
 func (UnimplementedGosherServer) ListenForFilePings(Gosher_ListenForFilePingsServer) error {
 	return status.Errorf(codes.Unimplemented, "method ListenForFilePings not implemented")
+}
+func (UnimplementedGosherServer) RequestFile(*RequestFileRequest, Gosher_RequestFileServer) error {
+	return status.Errorf(codes.Unimplemented, "method RequestFile not implemented")
+}
+func (UnimplementedGosherServer) SeedFile(Gosher_SeedFileServer) error {
+	return status.Errorf(codes.Unimplemented, "method SeedFile not implemented")
 }
 func (UnimplementedGosherServer) mustEmbedUnimplementedGosherServer() {}
 
@@ -266,6 +339,53 @@ func (x *gosherListenForFilePingsServer) Recv() (*ListenForFilePingsRequest, err
 	return m, nil
 }
 
+func _Gosher_RequestFile_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(RequestFileRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(GosherServer).RequestFile(m, &gosherRequestFileServer{stream})
+}
+
+type Gosher_RequestFileServer interface {
+	Send(*RequestFileResponse) error
+	grpc.ServerStream
+}
+
+type gosherRequestFileServer struct {
+	grpc.ServerStream
+}
+
+func (x *gosherRequestFileServer) Send(m *RequestFileResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func _Gosher_SeedFile_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(GosherServer).SeedFile(&gosherSeedFileServer{stream})
+}
+
+type Gosher_SeedFileServer interface {
+	Send(*SeedFileResponse) error
+	Recv() (*SeedFileRequest, error)
+	grpc.ServerStream
+}
+
+type gosherSeedFileServer struct {
+	grpc.ServerStream
+}
+
+func (x *gosherSeedFileServer) Send(m *SeedFileResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *gosherSeedFileServer) Recv() (*SeedFileRequest, error) {
+	m := new(SeedFileRequest)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // Gosher_ServiceDesc is the grpc.ServiceDesc for Gosher service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -292,6 +412,17 @@ var Gosher_ServiceDesc = grpc.ServiceDesc{
 		{
 			StreamName:    "ListenForFilePings",
 			Handler:       _Gosher_ListenForFilePings_Handler,
+			ServerStreams: true,
+			ClientStreams: true,
+		},
+		{
+			StreamName:    "RequestFile",
+			Handler:       _Gosher_RequestFile_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "SeedFile",
+			Handler:       _Gosher_SeedFile_Handler,
 			ServerStreams: true,
 			ClientStreams: true,
 		},

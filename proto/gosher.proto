@@ -9,7 +9,6 @@ message FileSendRequest {
     string destination = 2;
 }
 
-
 message Request {
     string msg = 1;
     string name = 2;
@@ -17,17 +16,11 @@ message Request {
     bytes file = 4;
 }
 
-
-
 message Response {
     string msg = 1;
     string name = 2;
     bytes file = 3;
 }
-
-
-
-
 
 message Identity {
 }
@@ -38,24 +31,47 @@ message PingForFileRequest {
 
 message PingForFileResponse {
     string who = 1;
-    string metadata = 2;
+    string fileName = 2;
 }
 
 message ListenForFilePingsRequest {
-    string description = 1;
+    string fileName = 1;
+    string description = 2;
 }
 
 message ListenForFilePingsResponse {
-    string metadata = 1;
+    string description = 1;
 }
 
 
 
+message RequestFileRequest {
+    string fileName = 1;
+    string who = 2;
+}
+
+message RequestFileResponse {
+    string msg = 1;
+    bytes file = 2;
+}
+
+message SeedFileRequest {
+    string msg = 1;
+    bytes file = 2;
+}
+
+message SeedFileResponse {
+    string fileName = 1;
+    string who = 2;
+}
+
 service Gosher {
     rpc SayHi (Request) returns (Response);
-
     rpc ReceiveHi (Identity) returns (stream Response) {}
 
     rpc PingForFile (PingForFileRequest) returns (stream PingForFileResponse) {}
     rpc ListenForFilePings (stream ListenForFilePingsRequest) returns (stream ListenForFilePingsResponse) {}
+    
+    rpc RequestFile (RequestFileRequest) returns (stream RequestFileResponse) {}
+    rpc SeedFile (stream SeedFileRequest) returns (stream SeedFileResponse) {}
 }

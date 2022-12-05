@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -91,4 +92,44 @@ func SaveFile(filePath string, file []byte) {
 	} else {
 		fmt.Println("Saved file")
 	}
+}
+
+/*
+* @function: CheckFilesForMatch
+* @description: Check folder for files
+* @params: description: string
+* @return: string[]
+ */
+func CheckFilesForMatch(description string) []string {
+	files, err := os.ReadDir("downloads")
+	if err != nil {
+		fmt.Println("Error reading directory")
+		panic(err)
+	}
+
+	var fileNames []string
+	for _, file := range files {
+		if !file.IsDir() && strings.Contains(file.Name(), description) {
+			fileNames = append(fileNames, file.Name())
+		}
+	}
+
+	return fileNames
+}
+
+/*
+* @function: OpenFile
+* @description: Open a file and return the file as a byte array
+* @params: filename: string
+* @return: []byte
+ */
+func OpenFile(filename string) ([]byte, error) {
+	file, err := os.ReadFile(filename)
+	if err != nil {
+		fmt.Println("Error opening file")
+		fmt.Println(err)
+		return nil, err
+	}
+
+	return file, nil
 }
