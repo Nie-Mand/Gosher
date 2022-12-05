@@ -3,10 +3,14 @@ package core
 import (
 	"fmt"
 
+	"Nie-Mand/Gosher/cli/schemas"
+
 	"google.golang.org/grpc"
 )
 
 func HandleCLI(client *grpc.ClientConn, args []string) {
+
+	api := schemas.NewGosherClient(client)
 
 	if len(args) == 0 {
 		fmt.Println("Hi, No command provided")
@@ -18,7 +22,10 @@ func HandleCLI(client *grpc.ClientConn, args []string) {
 		Init()
 
 	case "sayHi":
-		SayHi(client)
+		SayHi(&api)
+
+	case "receiveHi":
+		ReceiveHi(&api)
 	default:
 		fmt.Println("unknown command")
 	}

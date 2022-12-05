@@ -13,11 +13,11 @@ import (
 * @return: string
  */
 func GetEnv(envVarName string, defaultValue string) string {
-	port := os.Getenv(envVarName)
-	if port == "" {
-		port = defaultValue
+	value := os.Getenv(envVarName)
+	if value == "" {
+		value = defaultValue
 	}
-	return ":" + port
+	return value
 }
 
 /*

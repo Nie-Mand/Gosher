@@ -1,10 +1,12 @@
 package core
 
 import (
+	"context"
 	"fmt"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/metadata"
 )
 
 /*
@@ -13,7 +15,6 @@ import (
 * @params: uri: string
 * @return: *grpc.ClientConn
  */
-
 func CreateClient(uri string) *grpc.ClientConn {
 	var options []grpc.DialOption
 
@@ -36,9 +37,22 @@ func CreateClient(uri string) *grpc.ClientConn {
 	if _error != nil {
 		fmt.Printf("Failed to connect to server: %v\n", _error)
 		panic(_error)
-	} else {
-		fmt.Printf("Connected to server: %v\n", uri)
 	}
 
 	return connection
+}
+
+/*
+* @function: GetContext
+* @description: Get a context
+* @params: void
+* @return: context.Context
+ */
+func GetContext() context.Context {
+	ctx := context.Background()
+	ctx = metadata.NewOutgoingContext(
+		ctx,
+		metadata.Pairs("who", GetEnv("WHO", "anonymous")),
+	)
+	return ctx
 }
