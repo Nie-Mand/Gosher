@@ -13,6 +13,7 @@ type FilePings struct {
 	Description string
 }
 
+var pingForFileListenersCount int = 0
 var pingForFileChannel = make(chan FilePings)
 var pingForFileResponsesChannel = make(map[string]chan FilePings)
 
@@ -33,7 +34,9 @@ func listenForPingForFileChannel(cb func(FilePings)) {
 }
 
 func emitToPingForFileChannel(payload FilePings) {
-	pingForFileChannel <- payload
+	for i := 0; i < pingForFileListenersCount; i++ {
+		pingForFileChannel <- payload
+	}
 }
 
 func listenForFilePingResponsesChannel(description string, cb func(FilePings)) {
@@ -127,7 +130,9 @@ func (s *ServerStruct) PingForFile(payload *schemas.PingForFileRequest, server s
 
 func (s *ServerStruct) ListenForFilePings(server schemas.Gosher_ListenForFilePingsServer) error {
 	who := core.GetUser(server.Context())
+	pingForFileListenersCount++
 	fmt.Println("User " + who + " is listening for file pings")
+	fmt.Printf("Total listeners: %d\n", pingForFileListenersCount)
 
 	listenForPingForFileChannel(func(msg FilePings) {
 		if msg.FileName == "" {
@@ -137,18 +142,21 @@ func (s *ServerStruct) ListenForFilePings(server schemas.Gosher_ListenForFilePin
 			if err != nil {
 				fmt.Println(err)
 			}
-			response, err := server.Recv()
-			if err != nil {
-				fmt.Println(err)
-			} else {
-				fmt.Println("Sending response to " + who)
-				emitToFilePingResponsesChannel(msg.Description, FilePings{
-					Who:         who,
-					FileName:    response.FileName,
-					Description: response.Description,
-				})
-			}
+			for {
 
+				response, err := server.Recv()
+				if err != nil {
+					fmt.Println(err)
+				} else {
+					fmt.Println("Sending response to " + who)
+					emitToFilePingResponsesChannel(msg.Description, FilePings{
+						Who:         who,
+						FileName:    response.FileName,
+						Description: response.Description,
+					})
+				}
+
+			}
 		}
 	})
 	return nil
@@ -205,7 +213,6 @@ func createFileRequestChannel(filename string) func() {
 func listenForFileRequestChannel(filename string, cb func(FileRequest)) {
 	for {
 		msg := <-fileRequestChannel[filename]
-		fmt.Println(msg)
 		cb(msg)
 	}
 }
@@ -289,53 +296,7 @@ func (s *ServerStruct) SeedFile(server schemas.Gosher_SeedFileServer) error {
 			}
 		}
 
-		// 	if err != nil {
-		// 		fmt.Println(err)
-		// 	}
-		// 	response, err := server.Recv()
-		// 	if err != nil {
-		// 		fmt.Println(err)
-		// 	} else {
-		// 		fmt.Println("Sending response to " + who)
-		// 		emitToFilePingResponsesChannel(msg.Description, FilePings{
-		// 			Who:         who,
-		// 			FileName:    response.FileName,
-		// 			Description: response.Description,
-		// 		})
-		// 	}
-
-		// }
 	})
-
-	// who := core.GetUser(server.Context())
-	// fmt.Println("User " + who + " is listening for file pings")
-
-	// for {
-	// 	msg := <-pingForFileBridge
-	// 	fmt.Println(msg)
-	// 	if msg.FileName == "" {
-
-	// 		err := server.Send(&schemas.ListenForFilePingsResponse{
-	// 			Description: msg.Description,
-	// 		})
-
-	// 		if err != nil {
-	// 			fmt.Println(err)
-
-	// 		}
-	// 		response, err := server.Recv()
-	// 		if err != nil {
-	// 			fmt.Println(err)
-	// 		} else {
-	// 			pingForFileBridge <- FilePings{
-	// 				Who:         who,
-	// 				FileName:    response.FileName,
-	// 				Description: response.Description,
-	// 			}
-	// 		}
-
-	// 	}
-	// }
 
 	return nil
 }
