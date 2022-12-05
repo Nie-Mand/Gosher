@@ -1,28 +1,14 @@
 package core
 
 import (
-	"os"
+	"context"
 
 	"log"
 	"net"
 
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/metadata"
 )
-
-/*
-* @function: GetEnv
-* @description: Get the environment variable
-* @params: envVarName: string, defaultValue: string
-* @return: string
- */
-func GetEnv(envVarName string, defaultValue string) string {
-	port := os.Getenv(envVarName)
-	if port == "" {
-		port = defaultValue
-	}
-	return ":" + port
-}
 
 /*
 * @function: CreateServer
@@ -52,34 +38,20 @@ func CreateServer(uri string) (*grpc.Server, func()) {
 }
 
 /*
-* @function: CreateClient
-* @description: Create a client and return the client
-* @params: uri: string
-* @return: *grpc.ClientConn
+* @function: GetUser
+* @description: Get the user from the context
+* @params: ctx: context.Context
+* @return: string
  */
-
-func CreateClient(uri string) *grpc.ClientConn {
-	var options []grpc.DialOption
-
-	tls := GetEnv("SERVER_TLS", "1")
-
-	if tls == "1" {
-		// if *caFile == "" {
-		// 	*caFile = data.Path("x509/ca_cert.pem")
-		// }
-		// creds, err := credentials.NewClientTLSFromFile(*caFile, *serverHostOverride)
-		// if err != nil {
-		// 	log.Fatalf("Failed to create TLS credentials %v", err)
-		// }
-		// opts = append(opts, grpc.WithTransportCredentials(creds))
-	} else {
-		options = append(options, grpc.WithTransportCredentials(insecure.NewCredentials()))
+func GetUser(ctx context.Context) string {
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return ""
 	}
 
-	connection, _error := grpc.Dial(uri, options...)
-	if _error != nil {
-		log.Fatalf("fail to dial: %v", _error)
+	if len(md["who"]) == 0 {
+		return ""
 	}
 
-	return connection
+	return md["who"][0]
 }

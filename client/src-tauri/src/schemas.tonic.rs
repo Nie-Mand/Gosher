@@ -108,6 +108,54 @@ pub mod gosher_client {
             let path = http::uri::PathAndQuery::from_static("/schemas.Gosher/ReceiveHi");
             self.inner.server_streaming(request.into_request(), path, codec).await
         }
+        ///
+        pub async fn ping_for_file(
+            &mut self,
+            request: impl tonic::IntoRequest<super::PingForFileRequest>,
+        ) -> Result<
+            tonic::Response<tonic::codec::Streaming<super::PingForFileResponse>>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/schemas.Gosher/PingForFile",
+            );
+            self.inner.server_streaming(request.into_request(), path, codec).await
+        }
+        ///
+        pub async fn listen_for_file_pings(
+            &mut self,
+            request: impl tonic::IntoStreamingRequest<
+                Message = super::ListenForFilePingsRequest,
+            >,
+        ) -> Result<
+            tonic::Response<tonic::codec::Streaming<super::ListenForFilePingsResponse>>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/schemas.Gosher/ListenForFilePings",
+            );
+            self.inner.streaming(request.into_streaming_request(), path, codec).await
+        }
     }
 }
 /// Generated server implementations.
@@ -133,6 +181,28 @@ pub mod gosher_server {
             &self,
             request: tonic::Request<super::Identity>,
         ) -> Result<tonic::Response<Self::ReceiveHiStream>, tonic::Status>;
+        ///Server streaming response type for the PingForFile method.
+        type PingForFileStream: futures_core::Stream<
+                Item = Result<super::PingForFileResponse, tonic::Status>,
+            >
+            + Send
+            + 'static;
+        ///
+        async fn ping_for_file(
+            &self,
+            request: tonic::Request<super::PingForFileRequest>,
+        ) -> Result<tonic::Response<Self::PingForFileStream>, tonic::Status>;
+        ///Server streaming response type for the ListenForFilePings method.
+        type ListenForFilePingsStream: futures_core::Stream<
+                Item = Result<super::ListenForFilePingsResponse, tonic::Status>,
+            >
+            + Send
+            + 'static;
+        ///
+        async fn listen_for_file_pings(
+            &self,
+            request: tonic::Request<tonic::Streaming<super::ListenForFilePingsRequest>>,
+        ) -> Result<tonic::Response<Self::ListenForFilePingsStream>, tonic::Status>;
     }
     ///
     #[derive(Debug)]
@@ -265,6 +335,90 @@ pub mod gosher_server {
                                 send_compression_encodings,
                             );
                         let res = grpc.server_streaming(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/schemas.Gosher/PingForFile" => {
+                    #[allow(non_camel_case_types)]
+                    struct PingForFileSvc<T: Gosher>(pub Arc<T>);
+                    impl<
+                        T: Gosher,
+                    > tonic::server::ServerStreamingService<super::PingForFileRequest>
+                    for PingForFileSvc<T> {
+                        type Response = super::PingForFileResponse;
+                        type ResponseStream = T::PingForFileStream;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::ResponseStream>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::PingForFileRequest>,
+                        ) -> Self::Future {
+                            let inner = self.0.clone();
+                            let fut = async move {
+                                (*inner).ping_for_file(request).await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let inner = inner.0;
+                        let method = PingForFileSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            );
+                        let res = grpc.server_streaming(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/schemas.Gosher/ListenForFilePings" => {
+                    #[allow(non_camel_case_types)]
+                    struct ListenForFilePingsSvc<T: Gosher>(pub Arc<T>);
+                    impl<
+                        T: Gosher,
+                    > tonic::server::StreamingService<super::ListenForFilePingsRequest>
+                    for ListenForFilePingsSvc<T> {
+                        type Response = super::ListenForFilePingsResponse;
+                        type ResponseStream = T::ListenForFilePingsStream;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::ResponseStream>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<
+                                tonic::Streaming<super::ListenForFilePingsRequest>,
+                            >,
+                        ) -> Self::Future {
+                            let inner = self.0.clone();
+                            let fut = async move {
+                                (*inner).listen_for_file_pings(request).await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let inner = inner.0;
+                        let method = ListenForFilePingsSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            );
+                        let res = grpc.streaming(method, req).await;
                         Ok(res)
                     };
                     Box::pin(fut)

@@ -4,21 +4,54 @@ option go_package = "./schemas";
 
 package schemas;
 
+message FileSendRequest {
+    string fileBytes = 1;
+    string destination = 2;
+}
+
+
 message Request {
     string msg = 1;
     string destination = 2;
 }
 
-message Identity {
-    string id = 1;
-}
+
 
 message Response {
     string msg = 1;
 }
 
+
+
+
+
+message Identity {
+}
+
+message PingForFileRequest {
+    string description = 1;
+}
+
+message PingForFileResponse {
+    string who = 1;
+    string metadata = 2;
+}
+
+message ListenForFilePingsRequest {
+    string description = 1;
+}
+
+message ListenForFilePingsResponse {
+    string metadata = 1;
+}
+
+
+
 service Gosher {
     rpc SayHi (Request) returns (Response);
 
     rpc ReceiveHi (Identity) returns (stream Response) {}
+
+    rpc PingForFile (PingForFileRequest) returns (stream PingForFileResponse) {}
+    rpc ListenForFilePings (stream ListenForFilePingsRequest) returns (stream ListenForFilePingsResponse) {}
 }
