@@ -34,3 +34,6 @@ dist-ssr
 cache
 downloads
 tmp
+
+server.pem
+server.crt

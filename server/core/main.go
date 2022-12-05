@@ -23,7 +23,11 @@ func CreateServer(uri string) (*grpc.Server, func()) {
 		log.Fatalf("Failed to listen: %v", _error)
 	}
 
-	server := grpc.NewServer()
+	opts := []grpc.ServerOption{}
+
+	// opts = append(opts, grpc.Creds(GetTLSCredentials()))
+
+	server := grpc.NewServer(opts...)
 
 	log.Printf("Server listening at %v", listener.Addr())
 
