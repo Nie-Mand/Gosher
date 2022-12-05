@@ -11,12 +11,20 @@ pub struct Request {
     #[prost(string, tag="1")]
     pub msg: ::prost::alloc::string::String,
     #[prost(string, tag="2")]
+    pub name: ::prost::alloc::string::String,
+    #[prost(string, tag="3")]
     pub destination: ::prost::alloc::string::String,
+    #[prost(bytes="vec", tag="4")]
+    pub file: ::prost::alloc::vec::Vec<u8>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Response {
     #[prost(string, tag="1")]
     pub msg: ::prost::alloc::string::String,
+    #[prost(string, tag="2")]
+    pub name: ::prost::alloc::string::String,
+    #[prost(bytes="vec", tag="3")]
+    pub file: ::prost::alloc::vec::Vec<u8>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Identity {

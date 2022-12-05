@@ -7,10 +7,9 @@ import (
 	"fmt"
 )
 
-var bridge = make(map[string](chan string))
+var bridge = make(map[string](chan schemas.Response))
 
-var pingForFileBridge = make(chan string)
-
+// var pingForFileBridge = make(chan string)
 var closeBridge = make(chan string)
 
 type ServerStruct struct {
@@ -21,7 +20,9 @@ func (s *ServerStruct) SayHi(ctx context.Context, payload *schemas.Request) (*sc
 	who := core.GetUser(ctx)
 
 	resp := schemas.Response{
-		Msg: payload.Msg + ", going to be sent to " + payload.Destination + " from " + who,
+		Msg:  payload.Msg + ", going to be sent to " + payload.Destination + " from " + who,
+		Name: payload.Name,
+		File: payload.File,
 	}
 
 	if channel, ok := bridge[payload.Destination]; ok {
@@ -29,7 +30,7 @@ func (s *ServerStruct) SayHi(ctx context.Context, payload *schemas.Request) (*sc
 		if channel == nil {
 			resp.Msg = "User is not online, sending failed"
 		} else {
-			channel <- resp.Msg
+			channel <- resp
 		}
 
 	} else {
@@ -43,12 +44,12 @@ func (s *ServerStruct) ReceiveHi(_ *schemas.Identity, server schemas.Gosher_Rece
 	who := core.GetUser(server.Context())
 	fmt.Println("User " + who + " is online")
 
-	bridge[who] = make(chan string)
+	bridge[who] = make(chan schemas.Response)
 
 	for {
 		select {
 		case msg := <-bridge[who]:
-			err := server.Send(&schemas.Response{Msg: msg})
+			err := server.Send(&msg)
 			if err != nil {
 				return err
 			}

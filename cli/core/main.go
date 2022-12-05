@@ -3,6 +3,7 @@ package core
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -55,4 +56,39 @@ func GetContext() context.Context {
 		metadata.Pairs("who", GetEnv("WHO", "anonymous")),
 	)
 	return ctx
+}
+
+/*
+* @function: GetFile
+* @description: Open a file and return the file
+* @params: filePath: string
+* @return: []byte
+ */
+func GetFile(filePath string) []byte {
+	file, err := os.ReadFile(filePath)
+	if err != nil {
+		fmt.Println("Error opening file")
+		panic(err)
+	}
+	return file
+}
+
+/*
+* @function: SaveFile
+* @description: Save a file into the downloads directory
+* @params: filePath: string, file: []byte
+* @return: void
+ */
+func SaveFile(filePath string, file []byte) {
+	err := os.WriteFile(filePath,
+		file,
+		0644,
+	)
+
+	if err != nil {
+		fmt.Println("Error saving file")
+		panic(err)
+	} else {
+		fmt.Println("Saved file")
+	}
 }

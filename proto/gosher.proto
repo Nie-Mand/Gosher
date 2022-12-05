@@ -12,13 +12,17 @@ message FileSendRequest {
 
 message Request {
     string msg = 1;
-    string destination = 2;
+    string name = 2;
+    string destination = 3;
+    bytes file = 4;
 }
 
 
 
 message Response {
     string msg = 1;
+    string name = 2;
+    bytes file = 3;
 }
 
 

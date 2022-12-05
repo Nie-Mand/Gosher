@@ -11,9 +11,15 @@ func SayHi(
 ) {
 	fmt.Println("Sending Hi..")
 	ctx := GetContext()
+
+	filePath := "tmp/dev.png"
+	file := GetFile(filePath)
+
 	response, _error := (*api).SayHi(ctx, &schemas.Request{
 		Msg:         "BRUVVV",
+		Name:        "dev.png",
 		Destination: "niemand1",
+		File:        file,
 	})
 
 	if _error != nil {
@@ -42,9 +48,9 @@ func ReceiveHi(
 				os.Exit(1)
 			}
 			fmt.Printf("Response: %v\n", response.Msg)
+			SaveFile("downloads/"+response.Name, response.File)
 		}
 	}
-
 }
 
 func Init() {
@@ -55,12 +61,12 @@ func Init() {
 		fmt.Println("Created cache directory")
 	}
 
-	if err := os.Mkdir("shared", os.ModePerm); err != nil {
-		fmt.Println("Error creating shared directory")
+	if err := os.Mkdir("downloads", os.ModePerm); err != nil {
+		fmt.Println("Error creating downloads directory")
 		panic(err)
 
 	} else {
-		fmt.Println("Created shared directory")
+		fmt.Println("Created downloads directory")
 	}
 
 	// handle TLS Stuffs
