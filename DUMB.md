@@ -10,3 +10,17 @@ https://grpc.io/docs/languages/go/quickstart/
 https://grpc.io/docs/protoc-installation/
 
 https://github.com/casey/just
+
+Here are some notes I have when scanning your project:
+- Use spf13/cobra to create your cli.
+- Don't use println for logging using a dedicated library zap, logrus...
+- Unit tests are missing
+- Project structure can be improved
+- File names why do you use multiple main?
+- You can improve your readme file
+some useful links
+https://go.dev/doc/effective_go
+https://github.com/evrone/go-clean-template
+
+
+https://medium.com/tcp-ip/kerberos-authentication-fc41aa320a01

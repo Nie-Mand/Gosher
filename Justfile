@@ -10,6 +10,7 @@ setup:
     @printf "\033[0;33mInstalling Golang Dependencies: Started \033[0m \n"
     @cd server && go mod tidy
     @printf "\033[0;33mInstalling Golang Dependencies: Done \033[0m \n"
+    
     @printf "\033[0;33mGenerating the server's Private Key and Self-Assigned Certificate:Started \033[0m \n"
     @cd server && openssl genrsa -out server.pem 2048
     @cd server && openssl req -new -x509 -sha256 -key server.pem -out server.crt -days 3650
