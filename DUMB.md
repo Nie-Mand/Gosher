@@ -13,7 +13,9 @@ https://github.com/casey/just
 
 Here are some notes I have when scanning your project:
 - Use spf13/cobra to create your cli.
+https://cobra.dev/
 - Don't use println for logging using a dedicated library zap, logrus...
+- https://github.com/uber-go/zap
 - Unit tests are missing
 - Project structure can be improved
 - File names why do you use multiple main?
@@ -24,3 +26,5 @@ https://github.com/evrone/go-clean-template
 
 
 https://medium.com/tcp-ip/kerberos-authentication-fc41aa320a01
+https://plugins.miniorange.com/steps-to-setup-kerberos-on-ubuntu-rhel-centos
+https://github.com/jcmturner/gokrb5

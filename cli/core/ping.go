@@ -46,15 +46,16 @@ func ListenForFilePings(
 	ctx := GetContext()
 
 	stream, _error := (*api).ListenForFilePings(ctx)
+	
 	if _error != nil {
 		fmt.Printf("Error: %v\n", _error)
-	} else {
-		for {
-			response, _error := stream.Recv()
-			if _error != nil {
-				fmt.Printf("Error: %v\n", _error)
-				os.Exit(1)
-			}
+		} else {
+			for {
+				response, _error := stream.Recv()
+				if _error != nil {
+					fmt.Printf("Error: %v\n", _error)
+					os.Exit(1)
+				}
 			fmt.Println("Somebody is looking for a file with description: " + response.Description)
 			files := CheckFilesForMatch(response.Description)
 			for _, file := range files {

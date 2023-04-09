@@ -38,3 +38,5 @@ tmp
 server.pem
 server.crt
 
+
+.env
