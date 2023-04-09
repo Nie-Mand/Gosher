@@ -7,6 +7,10 @@ import (
 	"Nie-Mand/Gosher/server/utils"
 )
 
+/*
+* This file contains the files search services
+ */
+
 type FilePings struct {
 	Who         string
 	FileName    string
@@ -17,11 +21,16 @@ var pingForFileListenersCount int = 0
 var pingForFileChannel = make(chan FilePings)
 var pingForFileResponsesChannel = make(map[string]chan FilePings)
 
-
+/*
+* @function: PingForFile
+* @description: Search for a file
+* @params: payload: *schemas.PingForFileRequest, server: schemas.Gosher_PingForFileServer
+* @returns: error
+ */
 func (s *ServerStruct) PingForFile(payload *schemas.PingForFileRequest, server schemas.Gosher_PingForFileServer) error {
 	who := utils.GetUser(server.Context())
 	description := payload.Description
-	
+
 	bye := _createPingForFileChannelBridge(
 		&pingForFileResponsesChannel,
 		description,
@@ -42,7 +51,7 @@ func (s *ServerStruct) PingForFile(payload *schemas.PingForFileRequest, server s
 
 	_listenForFilePingResponsesChannel(
 		&pingForFileResponsesChannel,
-		description, 
+		description,
 		func(msg FilePings) {
 			fmt.Println("Sending response to " + who)
 			if msg.Description == description && msg.FileName != "" {
@@ -57,6 +66,12 @@ func (s *ServerStruct) PingForFile(payload *schemas.PingForFileRequest, server s
 	return nil
 }
 
+/*
+* @function: ListenForFilePings
+* @description: Listen for file pings
+* @params: server: schemas.Gosher_ListenForFilePingsServer
+* @returns: error
+ */
 func (s *ServerStruct) ListenForFilePings(server schemas.Gosher_ListenForFilePingsServer) error {
 	who := utils.GetUser(server.Context())
 	pingForFileListenersCount++
@@ -82,7 +97,7 @@ func (s *ServerStruct) ListenForFilePings(server schemas.Gosher_ListenForFilePin
 						fmt.Println("Sending response to " + who)
 						_emitToFilePingResponsesChannel(
 							&pingForFileResponsesChannel,
-							msg.Description, 
+							msg.Description,
 							FilePings{
 								Who:         who,
 								FileName:    response.FileName,
@@ -98,11 +113,10 @@ func (s *ServerStruct) ListenForFilePings(server schemas.Gosher_ListenForFilePin
 	return nil
 }
 
-
-
+// Private functions
 
 func _createPingForFileChannelBridge(
-	pingForFileResponsesChannel* map[string]chan FilePings,
+	pingForFileResponsesChannel *map[string]chan FilePings,
 	description string,
 ) func() {
 	(*pingForFileResponsesChannel)[description] = make(chan FilePings)
@@ -113,7 +127,7 @@ func _createPingForFileChannelBridge(
 }
 
 func _listenForPingForFileChannel(
-	pingForFileChannel* chan FilePings,
+	pingForFileChannel *chan FilePings,
 	cb func(FilePings),
 ) {
 	for {
@@ -124,8 +138,8 @@ func _listenForPingForFileChannel(
 }
 
 func _emitToPingForFileChannel(
-	pingForFileChannel* chan FilePings,
-	pingForFileListenersCount* int,
+	pingForFileChannel *chan FilePings,
+	pingForFileListenersCount *int,
 	payload FilePings,
 ) {
 	for i := 0; i < (*pingForFileListenersCount); i++ {
@@ -134,8 +148,8 @@ func _emitToPingForFileChannel(
 }
 
 func _listenForFilePingResponsesChannel(
-	pingForFileResponsesChannel* map[string]chan FilePings,
-	description string, 
+	pingForFileResponsesChannel *map[string]chan FilePings,
+	description string,
 	cb func(FilePings),
 ) {
 	for {
@@ -147,8 +161,8 @@ func _listenForFilePingResponsesChannel(
 }
 
 func _emitToFilePingResponsesChannel(
-	pingForFileResponsesChannel* map[string]chan FilePings,
-	description string, 
+	pingForFileResponsesChannel *map[string]chan FilePings,
+	description string,
 	payload FilePings,
 ) {
 	(*pingForFileResponsesChannel)[description] <- payload

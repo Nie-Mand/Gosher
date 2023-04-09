@@ -7,6 +7,10 @@ import (
 	"fmt"
 )
 
+/*
+* This file contains the file transfering services
+ */
+
 type FileRequest struct {
 	Who      string
 	FileName string
@@ -17,6 +21,12 @@ type FileRequest struct {
 var fileProvidersChannel = make(map[string]chan FileRequest)
 var fileRequestChannel = make(map[string]chan FileRequest)
 
+/*
+* @function: RequestFile
+* @description: Request a file from a user
+* @params: payload: *schemas.RequestFileRequest, server: schemas.Gosher_RequestFileServer
+* @returns: error
+ */
 func (s *ServerStruct) RequestFile(payload *schemas.RequestFileRequest, server schemas.Gosher_RequestFileServer) error {
 	who := utils.GetUser(server.Context())
 	filename := payload.FileName
@@ -43,6 +53,12 @@ func (s *ServerStruct) RequestFile(payload *schemas.RequestFileRequest, server s
 	return nil
 }
 
+/*
+* @function: SeedFile
+* @description: Listen for file requests
+* @params: server: schemas.Gosher_SeedFileServer
+* @returns: error
+ */
 func (s *ServerStruct) SeedFile(server schemas.Gosher_SeedFileServer) error {
 	who := utils.GetUser(server.Context())
 	fmt.Println("User " + who + " is listening for file requests")
@@ -84,6 +100,8 @@ func (s *ServerStruct) SeedFile(server schemas.Gosher_SeedFileServer) error {
 	return nil
 }
 
+
+// Private functions
 
 func _createFileRequestChannel(filename string) func() {
 	fileRequestChannel[filename] = make(chan FileRequest)
