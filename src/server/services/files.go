@@ -4,7 +4,7 @@ import (
 	"Nie-Mand/Gosher/server/schemas"
 	"Nie-Mand/Gosher/server/utils"
 	"errors"
-	"fmt"
+	"log"
 )
 
 /*
@@ -35,7 +35,7 @@ func (s *ServerStruct) RequestFile(payload *schemas.RequestFileRequest, server s
 	bye := _createFileRequestChannel(filename)
 	defer bye()
 
-	fmt.Println("User " + who + " is requesting the file " + filename + " from " + from)
+	log.Println("User " + who + " is requesting the file " + filename + " from " + from)
 	_emitToFileProvidersChannel(from, FileRequest{
 		Who:      from,
 		FileName: filename,
@@ -43,7 +43,7 @@ func (s *ServerStruct) RequestFile(payload *schemas.RequestFileRequest, server s
 	})
 
 	_listenForFileRequestChannel(filename, func(msg FileRequest) {
-		fmt.Println("received file back")
+		log.Println("received file back")
 		server.Send(&schemas.RequestFileResponse{
 			Msg:  msg.Msg,
 			File: msg.File,
@@ -61,12 +61,12 @@ func (s *ServerStruct) RequestFile(payload *schemas.RequestFileRequest, server s
  */
 func (s *ServerStruct) SeedFile(server schemas.Gosher_SeedFileServer) error {
 	who := utils.GetUser(server.Context())
-	fmt.Println("User " + who + " is listening for file requests")
+	log.Println("User " + who + " is listening for file requests")
 	bye := _createFileProvidersChannel(who)
 	defer bye()
 
 	_listenForFileProvidersChannel(who, func(msg FileRequest) {
-		fmt.Println("seed file", msg)
+		log.Println("seed file", msg)
 		server.Send(&schemas.SeedFileResponse{
 			FileName: msg.FileName,
 			Who:      who,
@@ -75,9 +75,9 @@ func (s *ServerStruct) SeedFile(server schemas.Gosher_SeedFileServer) error {
 		response, err := server.Recv()
 
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 		} else {
-			fmt.Println("Sending response to " + who)
+			log.Println("Sending response to " + who)
 			if response.Msg != "" {
 				_emitToFileRequestChannel(msg.FileName, FileRequest{
 					Who:      who,
@@ -100,7 +100,6 @@ func (s *ServerStruct) SeedFile(server schemas.Gosher_SeedFileServer) error {
 	return nil
 }
 
-
 // Private functions
 
 func _createFileRequestChannel(filename string) func() {
@@ -112,8 +111,6 @@ func _createFileRequestChannel(filename string) func() {
 }
 
 func _emitToFileProvidersChannel(who string, payload FileRequest) error {
-	fmt.Println("ok")
-	fmt.Println(who)
 
 	if _, ok := fileProvidersChannel[who]; ok {
 		fileProvidersChannel[who] <- payload
@@ -139,10 +136,10 @@ func _createFileProvidersChannel(who string) func() {
 }
 
 func _listenForFileProvidersChannel(who string, cb func(FileRequest)) {
-	fmt.Println(who + ": Started Listening for file requests")
+	log.Println(who + ": Started Listening for file requests")
 	for {
 		msg := <-fileProvidersChannel[who]
-		fmt.Println(msg)
+		log.Println(msg)
 		cb(msg)
 	}
 }

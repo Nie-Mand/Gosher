@@ -1,7 +1,7 @@
 package services
 
 import (
-	"fmt"
+	"log"
 
 	"Nie-Mand/Gosher/server/schemas"
 	"Nie-Mand/Gosher/server/utils"
@@ -38,7 +38,7 @@ func (s *ServerStruct) PingForFile(payload *schemas.PingForFileRequest, server s
 
 	defer bye()
 
-	fmt.Println("User " + who + " is requesting file with desciption: " + description)
+	log.Println("User " + who + " is requesting file with desciption: " + description)
 	_emitToPingForFileChannel(
 		&pingForFileChannel,
 		&pingForFileListenersCount,
@@ -53,7 +53,7 @@ func (s *ServerStruct) PingForFile(payload *schemas.PingForFileRequest, server s
 		&pingForFileResponsesChannel,
 		description,
 		func(msg FilePings) {
-			fmt.Println("Sending response to " + who)
+			log.Println("Sending response to " + who)
 			if msg.Description == description && msg.FileName != "" {
 				server.Send(&schemas.PingForFileResponse{
 					FileName: msg.FileName,
@@ -75,8 +75,8 @@ func (s *ServerStruct) PingForFile(payload *schemas.PingForFileRequest, server s
 func (s *ServerStruct) ListenForFilePings(server schemas.Gosher_ListenForFilePingsServer) error {
 	who := utils.GetUser(server.Context())
 	pingForFileListenersCount++
-	fmt.Println("User " + who + " is listening for file pings")
-	fmt.Printf("Total listeners: %d\n", pingForFileListenersCount)
+	log.Println("User " + who + " is listening for file pings")
+	log.Printf("Total listeners: %d\n", pingForFileListenersCount)
 
 	_listenForPingForFileChannel(
 		&pingForFileChannel,
@@ -86,15 +86,15 @@ func (s *ServerStruct) ListenForFilePings(server schemas.Gosher_ListenForFilePin
 					Description: msg.Description,
 				})
 				if err != nil {
-					fmt.Println(err)
+					log.Println(err)
 				}
 				for {
 
 					response, err := server.Recv()
 					if err != nil {
-						fmt.Println(err)
+						log.Println(err)
 					} else {
-						fmt.Println("Sending response to " + who)
+						log.Println("Sending response to " + who)
 						_emitToFilePingResponsesChannel(
 							&pingForFileResponsesChannel,
 							msg.Description,
@@ -132,7 +132,7 @@ func _listenForPingForFileChannel(
 ) {
 	for {
 		msg := <-(*pingForFileChannel)
-		fmt.Println(msg)
+		log.Println(msg)
 		cb(msg)
 	}
 }
@@ -153,9 +153,9 @@ func _listenForFilePingResponsesChannel(
 	cb func(FilePings),
 ) {
 	for {
-		fmt.Println("Listening for file ping responses")
+		log.Println("Listening for file ping responses")
 		msg := <-(*pingForFileResponsesChannel)[description]
-		fmt.Println(msg)
+		log.Println(msg)
 		cb(msg)
 	}
 }
