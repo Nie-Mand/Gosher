@@ -56,15 +56,15 @@ var listenCmd = &cobra.Command{
 
 		stream, _error := api.SeedFile(ctx)
 	if _error != nil {
-		fmt.Printf("Error: %v\n", _error)
+		log.Printf("Error: %v\n", _error)
 	} else {
 		for {
 			response, _error := stream.Recv()
 			if _error != nil {
-				fmt.Printf("Error: %v\n", _error)
+				log.Printf("Error: %v\n", _error)
 				os.Exit(1)
 			}
-			fmt.Println("i got", response)
+			log.Println("i got", response)
 			filename := response.FileName
 
 			fmt.Println("someone is requesting the file: " + filename + ", approve? [y/n]")
@@ -102,7 +102,7 @@ var listenCmd = &cobra.Command{
 		}
 	}
 	} else {
-		fmt.Println("Invalid event")
+		log.Println("Invalid event")
 	}
   },
 }
