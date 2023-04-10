@@ -32,7 +32,6 @@ func (s *ServerStruct) PingForFile(payload *schemas.PingForFileRequest, server s
 	description := payload.Description
 
 	bye := _createPingForFileChannelBridge(
-		&pingForFileResponsesChannel,
 		description,
 	)
 
@@ -40,8 +39,6 @@ func (s *ServerStruct) PingForFile(payload *schemas.PingForFileRequest, server s
 
 	log.Println("User " + who + " is requesting file with desciption: " + description)
 	_emitToPingForFileChannel(
-		&pingForFileChannel,
-		&pingForFileListenersCount,
 		FilePings{
 			Who:         who,
 			FileName:    "",
@@ -50,7 +47,6 @@ func (s *ServerStruct) PingForFile(payload *schemas.PingForFileRequest, server s
 	)
 
 	_listenForFilePingResponsesChannel(
-		&pingForFileResponsesChannel,
 		description,
 		func(msg FilePings) {
 			log.Println("Sending response to " + who)
@@ -79,7 +75,6 @@ func (s *ServerStruct) ListenForFilePings(server schemas.Gosher_ListenForFilePin
 	log.Printf("Total listeners: %d\n", pingForFileListenersCount)
 
 	_listenForPingForFileChannel(
-		&pingForFileChannel,
 		func(msg FilePings) {
 			if msg.FileName == "" {
 				err := server.Send(&schemas.ListenForFilePingsResponse{
@@ -96,7 +91,6 @@ func (s *ServerStruct) ListenForFilePings(server schemas.Gosher_ListenForFilePin
 					} else {
 						log.Println("Sending response to " + who)
 						_emitToFilePingResponsesChannel(
-							&pingForFileResponsesChannel,
 							msg.Description,
 							FilePings{
 								Who:         who,
@@ -116,54 +110,48 @@ func (s *ServerStruct) ListenForFilePings(server schemas.Gosher_ListenForFilePin
 // Private functions
 
 func _createPingForFileChannelBridge(
-	pingForFileResponsesChannel *map[string]chan FilePings,
 	description string,
 ) func() {
-	(*pingForFileResponsesChannel)[description] = make(chan FilePings)
+	pingForFileResponsesChannel[description] = make(chan FilePings)
 
 	return func() {
-		delete((*pingForFileResponsesChannel), description)
+		delete(pingForFileResponsesChannel, description)
 	}
 }
 
 func _listenForPingForFileChannel(
-	pingForFileChannel *chan FilePings,
 	cb func(FilePings),
 ) {
 	for {
-		msg := <-(*pingForFileChannel)
+		msg := <-pingForFileChannel
 		log.Println(msg)
 		cb(msg)
 	}
 }
 
 func _emitToPingForFileChannel(
-	pingForFileChannel *chan FilePings,
-	pingForFileListenersCount *int,
 	payload FilePings,
 ) {
-	for i := 0; i < (*pingForFileListenersCount); i++ {
-		(*pingForFileChannel) <- payload
+	for i := 0; i < pingForFileListenersCount; i++ {
+		pingForFileChannel <- payload
 	}
 }
 
 func _listenForFilePingResponsesChannel(
-	pingForFileResponsesChannel *map[string]chan FilePings,
 	description string,
 	cb func(FilePings),
 ) {
 	for {
 		log.Println("Listening for file ping responses")
-		msg := <-(*pingForFileResponsesChannel)[description]
+		msg := <-pingForFileResponsesChannel[description]
 		log.Println(msg)
 		cb(msg)
 	}
 }
 
 func _emitToFilePingResponsesChannel(
-	pingForFileResponsesChannel *map[string]chan FilePings,
 	description string,
 	payload FilePings,
 ) {
-	(*pingForFileResponsesChannel)[description] <- payload
+	pingForFileResponsesChannel[description] <- payload
 }

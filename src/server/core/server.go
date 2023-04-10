@@ -49,7 +49,7 @@ func CreateServer(uri string) (*grpc.Server, func()) {
 * @return: None
  */
 func StartServer() {
-	port := utils.GetEnv("SERVER_PORT", "50051")
+	port := ":" + utils.GetEnv("SERVER_PORT", "50051")
 
 	server, listen := CreateServer(port)
 
