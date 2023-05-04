@@ -16,14 +16,14 @@ import (
 func GetClient() (*grpc.ClientConn) {
 	host := GetEnv("SERVER_HOST", "localhost")
 	port := GetEnv("SERVER_PORT", "50051")
-	tls := GetEnv("SERVER_TLS", "1")
+	// tls := GetEnv("SERVER_TLS", "1")
 
 	uri := host + ":" + port
 
 	fmt.Println("Connecting to server at: ", uri)
 	var options []grpc.DialOption
 
-	if tls == "1" {
+	// if tls == "1" {
 		// if *caFile == "" {
 		// 	*caFile = data.Path("x509/ca_cert.pem")
 		// }
@@ -32,9 +32,9 @@ func GetClient() (*grpc.ClientConn) {
 		// 	log.Fatalf("Failed to create TLS credentials %v", err)
 		// }
 		// opts = append(opts, grpc.WithTransportCredentials(creds))
-	} else {
+	// } else {
 		options = append(options, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	}
+	// }
 
 	client, _error := grpc.Dial(uri, options...)
 	if _error != nil {
