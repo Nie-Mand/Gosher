@@ -8,6 +8,9 @@ import (
 	"Nie-Mand/Gosher/server/services"
 	"Nie-Mand/Gosher/server/utils"
 
+	"github.com/jcmturner/gokrb5/v8/keytab"
+	"github.com/jcmturner/gokrb5/v8/service"
+	grpc_krb "github.com/jcmturner/grpckrb"
 	"google.golang.org/grpc"
 )
 
@@ -24,9 +27,21 @@ func CreateServer(uri string) (*grpc.Server, func()) {
 		log.Fatalf("Failed to listen: %v", _error)
 	}
 
-	opts := []grpc.ServerOption{}
 
-	// opts = append(opts, grpc.Creds(GetTLSCredentials()))
+	// Kerberos Authentication
+	usesK5 := utils.GetEnv("USES_K5", "1")
+	keytabFilePath := utils.GetEnv("KEYTAB_PATH", "/etc/krb5.keytab")
+	kt, _ := keytab.Load(keytabFilePath)
+	interceptor := &grpc_krb.KRBServerInterceptor{
+		Settings: service.NewSettings(kt),
+	}
+
+	var opts []grpc.ServerOption
+
+	if usesK5 == "1" {
+		opts = append(opts, grpc.UnaryInterceptor(interceptor.Unary()))
+		opts = append(opts, grpc.StreamInterceptor(interceptor.Stream()))
+	}
 
 	server := grpc.NewServer(opts...)
 

@@ -26,5 +26,9 @@ https://github.com/evrone/go-clean-template
 
 
 https://medium.com/tcp-ip/kerberos-authentication-fc41aa320a01
-https://plugins.miniorange.com/steps-to-setup-kerberos-on-ubuntu-rhel-centos
+
+
 https://github.com/jcmturner/gokrb5
+https://www.youtube.com/watch?v=5N242XcKAsM
+https://github.com/dosvath/kerberos-containers
+https://pkg.go.dev/gopkg.in/jcmturner/gokrb5.v8#section-readme
